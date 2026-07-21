@@ -19,8 +19,12 @@ import SellerRegistrationStatus from "./pages/seller/RegistrationStatus";
 
 import BuyerDashboard from "./pages/dashboard/BuyerDashboard";
 import AdminDashboard from "./pages/dashboard/AdminDashboard";
+import AdminProducts from "./pages/admin/Products";
+import AdminPendingProducts from "./pages/admin/PendingProducts";
+import AdminProductDetail from "./pages/admin/ProductDetail";
 
 import SellerLayout from "./components/seller/SellerLayout";
+import AdminLayout from "./components/admin/AdminLayout";
 import SellerDashboard from "./pages/seller/Dashboard";
 import SellerProducts from "./pages/seller/Products";
 import SellerAddProduct from "./pages/seller/AddProduct";
@@ -83,8 +87,15 @@ export default function App() {
                 <Route path="/seller/profile" element={<SellerProfile />} />
               </Route>
             </Route>
-            <Route element={<AdminRoute />}>
+          </Route>
+
+          {/* Admin panel — own dedicated layout (sidebar + topbar), no public navbar */}
+          <Route element={<AdminRoute />}>
+            <Route element={<AdminLayout />}>
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/admin/products" element={<AdminProducts />} />
+              <Route path="/admin/products/pending" element={<AdminPendingProducts />} />
+              <Route path="/admin/products/:id" element={<AdminProductDetail />} />
             </Route>
           </Route>
 
