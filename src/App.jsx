@@ -21,6 +21,7 @@ import BuyerDashboard from "./pages/dashboard/BuyerDashboard";
 import AdminDashboard from "./pages/dashboard/AdminDashboard";
 
 import SellerLayout from "./components/seller/SellerLayout";
+import AdminLayout from "./components/admin/AdminLayout";
 import SellerDashboard from "./pages/seller/Dashboard";
 import SellerProducts from "./pages/seller/Products";
 import SellerAddProduct from "./pages/seller/AddProduct";
@@ -83,7 +84,11 @@ export default function App() {
                 <Route path="/seller/profile" element={<SellerProfile />} />
               </Route>
             </Route>
-            <Route element={<AdminRoute />}>
+          </Route>
+
+          {/* Admin panel — own dedicated layout (sidebar + topbar), no public navbar */}
+          <Route element={<AdminRoute />}>
+            <Route element={<AdminLayout />}>
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
             </Route>
           </Route>
