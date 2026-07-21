@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import toast from "react-hot-toast";
 import authService from "../services/authService";
+import sellerService from "../services/sellerService";
 
 const AuthContext = createContext(null);
 
@@ -54,6 +55,22 @@ export function AuthProvider({ children }) {
     return authUser;
   }, []);
 
+  // Seller signup can either be auto-approved (backend returns a session
+  // straight away) or held for admin review (backend returns a status only).
+  const registerSeller = useCallback(async (formData) => {
+    const { data } = await sellerService.register(formData);
+    const authToken = data.token || data.accessToken;
+
+    if (authToken && data.user) {
+      const authUser = persistSession(data);
+      toast.success("Seller account created successfully!");
+      return { approved: true, user: authUser };
+    }
+
+    toast.success(data.message || "Seller application submitted for review.");
+    return { approved: false, status: data.status || "pending", message: data.message };
+  }, []);
+
   const login = useCallback(async (credentials) => {
     const { data } = await authService.login(credentials);
     const authUser = persistSession(data);
@@ -78,6 +95,7 @@ export function AuthProvider({ children }) {
     isSeller: user?.role === "seller",
     isAdmin: user?.role === "admin",
     register,
+    registerSeller,
     login,
     logout,
   };
