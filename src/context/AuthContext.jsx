@@ -86,6 +86,14 @@ export function AuthProvider({ children }) {
     toast.success("Logged out successfully");
   }, []);
 
+  const updateUser = useCallback((partialUser) => {
+    setUser((prev) => {
+      const merged = { ...prev, ...partialUser };
+      localStorage.setItem("rewear_user", JSON.stringify(merged));
+      return merged;
+    });
+  }, []);
+
   const value = {
     user,
     token,
@@ -98,6 +106,7 @@ export function AuthProvider({ children }) {
     registerSeller,
     login,
     logout,
+    updateUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
