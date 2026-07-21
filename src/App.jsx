@@ -22,6 +22,9 @@ import AdminDashboard from "./pages/dashboard/AdminDashboard";
 import AdminProducts from "./pages/admin/Products";
 import AdminPendingProducts from "./pages/admin/PendingProducts";
 import AdminProductDetail from "./pages/admin/ProductDetail";
+import AdminSellers from "./pages/admin/Sellers";
+import AdminPendingSellers from "./pages/admin/PendingSellers";
+import AdminSellerDetail from "./pages/admin/SellerDetail";
 
 import SellerLayout from "./components/seller/SellerLayout";
 import AdminLayout from "./components/admin/AdminLayout";
@@ -96,6 +99,9 @@ export default function App() {
               <Route path="/admin/products" element={<AdminProducts />} />
               <Route path="/admin/products/pending" element={<AdminPendingProducts />} />
               <Route path="/admin/products/:id" element={<AdminProductDetail />} />
+              <Route path="/admin/sellers" element={<AdminSellers />} />
+              <Route path="/admin/sellers/pending" element={<AdminPendingSellers />} />
+              <Route path="/admin/sellers/:id" element={<AdminSellerDetail />} />
             </Route>
           </Route>
 
