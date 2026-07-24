@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { CheckCircle2, Package, ShoppingBag } from "lucide-react";
 import orderService from "../../services/orderService";
+import { normalizeOrder } from "../../utils/normalizeAdminOrders";
 import { formatNPR } from "../../utils/formatCurrency";
 import { formatDate } from "../../utils/formatDate";
 import LoadingSpinner from "../../components/LoadingSpinner";
@@ -15,7 +16,7 @@ export default function OrderSuccess() {
   useEffect(() => {
     orderService
       .getOrderById(id)
-      .then(({ data }) => setOrder(data.order || data))
+      .then(({ data }) => setOrder(normalizeOrder(data.data)))
       .catch(() => setOrder(null))
       .finally(() => setLoading(false));
   }, [id]);
@@ -44,7 +45,7 @@ export default function OrderSuccess() {
           <div className="flex items-center justify-between border-b border-dashed border-ink-200 pb-3">
             <span className="text-ink-500">Order number</span>
             <span className="font-semibold text-ink-900">
-              #{(order._id || order.id || id).toString().slice(-6).toUpperCase()}
+              #{(order.id || id).toString().slice(-6).toUpperCase()}
             </span>
           </div>
           <div className="flex items-center justify-between py-2">

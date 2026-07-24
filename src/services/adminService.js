@@ -21,23 +21,21 @@ const adminService = {
   rejectProduct: (id, reason) => api.put(`/admin/products/${id}/reject`, { reason }),
   deleteProduct: (id) => api.delete(`/admin/products/${id}`),
 
-  // Seller verification
-  getSellers: (params) => api.get("/admin/sellers", { params }),
-  getPendingSellers: (params) => api.get("/admin/sellers/pending", { params }),
-  getSeller: (id) => api.get(`/admin/sellers/${id}`),
-  approveSeller: (id) => api.put(`/admin/sellers/${id}/approve`),
-  rejectSeller: (id, reason) => api.put(`/admin/sellers/${id}/reject`, { reason }),
-  // No separate unblock endpoint was specified — reused with a `blocked` flag so the
-  // backend can toggle either direction from the same route.
-  blockSeller: (id) => api.put(`/admin/sellers/${id}/block`, { blocked: true }),
-  unblockSeller: (id) => api.put(`/admin/sellers/${id}/block`, { blocked: false }),
+  // Order management — these live under /orders, not /admin, on the backend
+  getOrders: (params) => api.get("/orders/admin/all", { params }),
+  getOrder: (id) => api.get(`/orders/${id}`),
+  updateOrderStatus: (id, orderStatus) => api.put(`/orders/${id}/status`, { orderStatus }),
+
+  // Reported products — these live under /reports, not /admin, on the backend
+  getReports: (params) => api.get("/reports/admin/all", { params }),
+  resolveReport: (id, action) => api.put(`/reports/${id}/resolve`, { action }),
 
   // User management
   getUsers: (params) => api.get("/admin/users", { params }),
   getUser: (id) => api.get(`/admin/users/${id}`),
   updateUser: (id, payload) => api.put(`/admin/users/${id}`, payload),
-  blockUser: (id) => api.put(`/admin/users/${id}/block`, { blocked: true }),
-  unblockUser: (id) => api.put(`/admin/users/${id}/block`, { blocked: false }),
+  blockUser: (id) => api.put(`/admin/users/${id}/block`, { isBlocked: true }),
+  unblockUser: (id) => api.put(`/admin/users/${id}/block`, { isBlocked: false }),
   deleteUser: (id) => api.delete(`/admin/users/${id}`),
 };
 

@@ -14,7 +14,7 @@ export default function SellerOrders() {
   useEffect(() => {
     sellerService
       .getOrders()
-      .then(({ data }) => setOrders(data.orders || data || []))
+      .then(({ data }) => setOrders(data.data || []))
       .catch(() => setOrders([]))
       .finally(() => setLoading(false));
   }, []);
@@ -44,9 +44,9 @@ export default function SellerOrders() {
                 </p>
                 <p className="text-xs text-ink-400">{formatDate(order.createdAt)}</p>
               </div>
-              <p className="text-ink-600">{order.buyerName || order.buyer?.name || "Buyer"}</p>
-              <span className="font-semibold">{formatNPR(order.total)}</span>
-              <OrderStatusBadge status={order.status} />
+              <p className="text-ink-600">{order.buyer?.name || "Buyer"}</p>
+              <span className="font-semibold">{formatNPR(order.mySubtotal)}</span>
+              <OrderStatusBadge status={order.orderStatus} />
             </div>
           ))}
         </div>

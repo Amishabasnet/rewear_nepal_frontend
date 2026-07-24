@@ -7,6 +7,7 @@ import LoadingSpinner from "../LoadingSpinner";
 import EmptyState from "../EmptyState";
 import { getOtherParticipant, getChatProduct } from "../../utils/chatHelpers";
 import { formatNPR } from "../../utils/formatCurrency";
+import { getImageUrl } from "../../utils/getImageUrl";
 
 export default function ChatWindow({ chat, messages, currentUserId, onSend, sending, loading }) {
   const bottomRef = useRef(null);
@@ -65,7 +66,7 @@ export default function ChatWindow({ chat, messages, currentUserId, onSend, send
           className="flex items-center gap-3 border-b border-ink-100 bg-cream-50 p-2.5 transition hover:bg-cream-100"
         >
           <img
-            src={product.images?.[0] || product.image}
+            src={getImageUrl(product.images?.[0] || product.image)}
             alt={product.title || product.name}
             className="h-10 w-10 shrink-0 rounded-lg object-cover"
           />

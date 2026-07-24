@@ -1,13 +1,12 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { getDashboardPath } from "../utils/roleRedirect";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 export default function SellerRoute() {
-  const { isAuthenticated, isSeller, user, loading } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
 
-  if (loading) return null;
+  if (loading) return <LoadingSpinner label="Loading..." />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
-  if (!isSeller) return <Navigate to={getDashboardPath(user?.role)} replace />;
 
   return <Outlet />;
 }

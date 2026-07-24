@@ -19,16 +19,11 @@ export default function SellerEditProduct() {
     setNotFound(false);
 
     sellerService
-      .getProducts()
+      .getProduct(id)
       .then(({ data }) => {
         if (!active) return;
-        const list = data.products || data || [];
-        const match = list.find((p) => (p._id || p.id)?.toString() === id);
-        if (match) {
-          setProduct(match);
-        } else {
-          setNotFound(true);
-        }
+        setProduct(data.data || null);
+        if (!data.data) setNotFound(true);
       })
       .catch(() => active && setNotFound(true))
       .finally(() => active && setLoading(false));

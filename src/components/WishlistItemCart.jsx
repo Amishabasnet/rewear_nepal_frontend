@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { ShoppingBag, Loader2, X } from "lucide-react";
 import { formatNPR } from "../utils/formatCurrency";
 import { CONDITION_LABEL } from "../utils/constants";
+import { getImageUrl } from "../utils/getImageUrl";
 
 export default function WishlistItemCard({ product, onRemove, onMoveToCart, busy }) {
   const discount = product.originalPrice
@@ -13,7 +14,7 @@ export default function WishlistItemCard({ product, onRemove, onMoveToCart, busy
       <Link to={`/products/${product._id}`} className="block">
         <div className="relative aspect-[4/5] overflow-hidden bg-cream-200">
           <img
-            src={product.images?.[0]}
+            src={getImageUrl(product.images?.[0])}
             alt={product.title || product.name}
             loading="lazy"
             className="h-full w-full object-cover transition duration-300 group-hover:scale-105"

@@ -7,7 +7,7 @@ import { getSocket } from "../../services/socket";
 import { useAuth } from "../../context/AuthContext";
 
 import ConversationList from "../../components/chat/ConversationList";
-import ChatWindow from "../../components/chat/ChatWindow";
+import ChatWindow from "../../components/chat/ChatWindows";
 import LoadingSpinner from "../../components/LoadingSpinner";
 
 export default function Messages() {

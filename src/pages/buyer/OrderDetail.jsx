@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import orderService from "../../services/orderService";
+import { normalizeOrder } from "../../utils/normalizeAdminOrders";
 import { formatNPR } from "../../utils/formatCurrency";
 import { formatDate } from "../../utils/formatDate";
 import LoadingSpinner from "../../components/LoadingSpinner";
@@ -16,7 +17,7 @@ export default function OrderDetail() {
   useEffect(() => {
     orderService
       .getOrderById(id)
-      .then(({ data }) => setOrder(data.order))
+      .then(({ data }) => setOrder(normalizeOrder(data.data)))
       .catch(() => setOrder(null))
       .finally(() => setLoading(false));
   }, [id]);
@@ -34,7 +35,7 @@ export default function OrderDetail() {
       ) : (
         <div className="rounded-xl border border-ink-100 bg-white p-6">
           <h1 className="text-xl font-semibold text-ink-900">
-            Order #{order._id?.slice(-6).toUpperCase()}
+            Order #{order.id?.slice(-6).toUpperCase()}
           </h1>
           <p className="text-sm text-ink-400">Placed on {formatDate(order.createdAt)}</p>
           <p className="mt-4 text-2xl font-bold text-rust-500">{formatNPR(order.total)}</p>

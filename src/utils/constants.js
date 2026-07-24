@@ -76,3 +76,9 @@ export const ORDER_STATUS_META = {
 
 // Linear progress order for the tracker — cancelled is handled separately
 export const ORDER_PROGRESS_STEPS = ["pending", "confirmed", "processing", "shipped", "delivered"];
+
+// User role badge — shown in the admin users list
+export const ROLE_META = {
+  buyer: { label: "Buyer", className: "bg-ink-100 text-ink-700" },
+  admin: { label: "Admin", className: "bg-rust-50 text-rust-600" },
+};

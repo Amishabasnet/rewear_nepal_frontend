@@ -6,6 +6,6 @@ export function getDashboardPath(role) {
       return "/seller/dashboard";
     case "buyer":
     default:
-      return "/buyer/dashboard";
+      return "/products";
   }
 }

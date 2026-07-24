@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import { Package, PlusCircle, Pencil, Trash2 } from "lucide-react";
 import sellerService from "../../services/sellerService";
 import ProductStatusBadge from "../../components/seller/ProductStatusBadge";
+import { getImageUrl } from "../../utils/getImageUrl";
 import { formatNPR } from "../../utils/formatCurrency";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import EmptyState from "../../components/EmptyState";
@@ -24,7 +25,7 @@ export default function SellerProducts() {
     setLoading(true);
     sellerService
       .getProducts()
-      .then(({ data }) => setProducts(data.products || data || []))
+      .then(({ data }) => setProducts(data.data || []))
       .catch(() => {
         setProducts([]);
         toast.error("Could not load your products");
@@ -94,9 +95,9 @@ export default function SellerProducts() {
                   <tr key={id} className="hover:bg-cream-50">
                     <td className="flex items-center gap-3 px-4 py-3">
                       <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-cream-100">
-                        {p.image || p.images?.[0] ? (
+                        {getImageUrl(p.image || p.images?.[0]) ? (
                           <img
-                            src={p.image || p.images[0]}
+                            src={getImageUrl(p.image || p.images[0])}
                             alt={p.name || p.title}
                             className="h-full w-full object-cover"
                           />

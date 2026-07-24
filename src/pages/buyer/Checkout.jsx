@@ -13,26 +13,27 @@ import {
   ShoppingBag,
 } from "lucide-react";
 
-import cartService from "../../services/cartService";
 import addressService from "../../services/addressService";
 import couponService from "../../services/couponService";
 import orderService from "../../services/orderService";
 import paymentService from "../../services/paymentService";
+import { useCart } from "../../context/CartContext";
 
 import CheckoutStepper from "../../components/checkout/CheckoutStepper";
 import AddressForm from "../../components/checkout/AddressForm";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import EmptyState from "../../components/EmptyState";
 import { formatNPR } from "../../utils/formatCurrency";
+import { getImageUrl } from "../../utils/getImageUrl";
 
 const DELIVERY_CHARGE = 150;
 const FREE_DELIVERY_THRESHOLD = 5000;
 
 export default function Checkout() {
   const navigate = useNavigate();
+  const { items: cartItems, loading: cartLoading, refreshCart } = useCart();
 
   const [loading, setLoading] = useState(true);
-  const [cartItems, setCartItems] = useState([]);
   const [addresses, setAddresses] = useState([]);
 
   const [step, setStep] = useState(1);
@@ -53,20 +54,19 @@ export default function Checkout() {
   const [placingOrder, setPlacingOrder] = useState(false);
 
   useEffect(() => {
-    Promise.allSettled([cartService.getCart(), addressService.getAddresses()]).then(
-      ([cartRes, addressRes]) => {
-        if (cartRes.status === "fulfilled") {
-          setCartItems(cartRes.value.data.items || cartRes.value.data.cart?.items || []);
-        }
-        if (addressRes.status === "fulfilled") {
-          const list = addressRes.value.data.addresses || addressRes.value.data || [];
-          setAddresses(list);
-          const preferred = list.find((a) => a.isDefault) || list[0];
-          if (preferred) setSelectedAddressId(preferred._id || preferred.id);
-        }
+    refreshCart();
+    addressService.getAddresses().then(
+      (addressRes) => {
+        const list = addressRes.data.data || addressRes.data.addresses || addressRes.data || [];
+        const addressList = Array.isArray(list) ? list : [];
+        setAddresses(addressList);
+        const preferred = addressList.find((a) => a.isDefault) || addressList[0];
+        if (preferred) setSelectedAddressId(preferred._id || preferred.id);
         setLoading(false);
-      }
+      },
+      () => setLoading(false)
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const subtotal = useMemo(
@@ -87,7 +87,7 @@ export default function Checkout() {
     setSavingAddress(true);
     try {
       const { data } = await addressService.addAddress(formValues);
-      const newAddress = data.address || data;
+      const newAddress = data.data || data.address || data;
       setAddresses((prev) => [...prev, newAddress]);
       setSelectedAddressId(newAddress._id || newAddress.id);
       setShowAddressForm(false);
@@ -103,7 +103,8 @@ export default function Checkout() {
     if (!couponCode.trim()) return;
     setApplyingCoupon(true);
     try {
-      const { data } = await couponService.applyCoupon(couponCode.trim(), subtotal);
+      const { data: body } = await couponService.applyCoupon(couponCode.trim(), subtotal);
+      const data = body.data || body;
       const discountAmount = data.discountAmount ?? data.discount ?? 0;
       if (!discountAmount) {
         toast.error(data.message || "This coupon isn't valid");
@@ -128,28 +129,21 @@ export default function Checkout() {
     try {
       const payload = {
         addressId: selectedAddressId,
-        items: cartItems.map((i) => ({
-          productId: i.product?._id || i.product?.id || i.productId,
-          quantity: i.quantity || 1,
-        })),
         couponCode: appliedCoupon?.code || undefined,
-        paymentMethod,
-        subtotal,
-        deliveryCharge,
-        discount,
-        total,
+        paymentMethod: paymentMethod === "cod" ? "cash_on_delivery" : "card",
       };
 
-      const { data } = await orderService.createOrder(payload);
-      const order = data.order || data;
+      const { data: body } = await orderService.createOrder(payload);
+      const order = body.data || body.order || body;
       const orderId = order._id || order.id;
 
       if (paymentMethod === "online") {
         try {
-          const { data: paymentData } = await paymentService.createPayment({
+          const { data: paymentBody } = await paymentService.createPayment({
             orderId,
             amount: total,
           });
+          const paymentData = paymentBody.data || paymentBody;
           if (paymentData.paymentUrl) {
             window.location.href = paymentData.paymentUrl;
             return;
@@ -161,14 +155,19 @@ export default function Checkout() {
 
       toast.success("Order placed successfully!");
       navigate(`/order-success/${orderId}`, { replace: true });
+      // Backend already empties the cart when the order is created — just resync
+      // local state. refreshCart() never throws (it swallows its own errors),
+      // so this can't ever mask a successful order.
+      refreshCart();
     } catch (err) {
+      console.error("Place order failed:", err);
       toast.error(err.response?.data?.message || "Could not place your order");
     } finally {
       setPlacingOrder(false);
     }
   };
 
-  if (loading) {
+  if (loading || cartLoading) {
     return (
       <div className="mx-auto max-w-5xl px-4 py-10">
         <LoadingSpinner label="Preparing checkout..." />
@@ -301,7 +300,7 @@ export default function Checkout() {
                     return (
                       <div key={item._id || product._id} className="flex items-center gap-3 py-3">
                         <img
-                          src={product.images?.[0] || product.image}
+                          src={getImageUrl(product.images?.[0] || product.image)}
                           alt={product.title || product.name}
                           className="h-14 w-14 shrink-0 rounded-lg object-cover"
                         />

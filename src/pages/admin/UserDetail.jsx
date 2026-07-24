@@ -14,7 +14,6 @@ import { formatDate } from "../../utils/formatDate";
 
 const ROLE_OPTIONS = [
   { value: "buyer", label: "Buyer" },
-  { value: "seller", label: "Seller" },
   { value: "admin", label: "Admin" },
 ];
 
