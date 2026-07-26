@@ -11,8 +11,10 @@ export default function AddressForm({ onSave, onCancel, saving }) {
     formState: { errors },
   } = useForm();
 
+  const submit = (values) => onSave({ ...values, country: "Nepal" });
+
   return (
-    <form onSubmit={handleSubmit(onSave)} className="space-y-4 rounded-xl border border-ink-100 bg-cream-50 p-4" noValidate>
+    <form onSubmit={handleSubmit(submit)} className="space-y-4 rounded-xl border border-ink-100 bg-cream-50 p-4" noValidate>
       <Input
         label="Full name"
         placeholder="Anisha Sharma"
@@ -42,8 +44,14 @@ export default function AddressForm({ onSave, onCancel, saving }) {
           error={errors.city?.message}
           {...register("city", { required: "Select a city" })}
         />
-        <Input label="Landmark (optional)" placeholder="Near..." {...register("landmark")} />
+        <Input
+          label="Postal code"
+          placeholder="44600"
+          error={errors.postalCode?.message}
+          {...register("postalCode", { required: "Postal code is required" })}
+        />
       </div>
+      <Input label="Landmark (optional)" placeholder="Near..." {...register("landmark")} />
 
       <div className="flex gap-3 pt-1">
         <div className="flex-1">

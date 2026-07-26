@@ -5,29 +5,56 @@ import toast from "react-hot-toast";
 import Input from "../../components/Input";
 import Select from "../../components/Select";
 import Button from "../../components/Button";
-import { useAuth } from "../../context/AuthContext";
-import { getDashboardPath } from "../../utils/roleRedirect";
+import PasswordStrengthMeter from "../../components/PasswordStrengthMeter";
+import Recaptcha from "../../components/Recaptcha";
+import authService from "../../services/authService";
+import { isStrongPassword, STRONG_PASSWORD_MESSAGE } from "../../utils/passwordStrength";
 
 export default function Register() {
   const {
     register,
     handleSubmit,
     watch,
+    setError,
     formState: { errors },
   } = useForm({ defaultValues: { role: "buyer" } });
   const [loading, setLoading] = useState(false);
-  const { register: signUp } = useAuth();
+  const [captchaToken, setCaptchaToken] = useState(null);
+  const [captchaError, setCaptchaError] = useState("");
   const navigate = useNavigate();
   const password = watch("password");
+  const email = watch("email");
+  const ADMIN_EMAIL_DOMAIN = "@rewear.np.com";
 
   const onSubmit = async (formData) => {
+    if (!captchaToken) {
+      setCaptchaError("Please complete the CAPTCHA");
+      return;
+    }
+    setCaptchaError("");
     setLoading(true);
     try {
-      const {  ...payload } = formData;
-      const user = await signUp(payload);
-      navigate(getDashboardPath(user.role), { replace: true });
+      const { ...payload } = formData;
+      // Deliberately not auto-logging the user in here — create the account,
+      // then send them to the login page to sign in themselves.
+      await authService.register({ ...payload, captchaToken });
+      toast.success("Account created! Please log in.");
+      navigate("/login", { replace: true });
     } catch (err) {
-      toast.error(err.response?.data?.message || "Could not create account");
+      const backendErrors = err.response?.data?.errors;
+
+      if (Array.isArray(backendErrors) && backendErrors.length > 0) {
+        // Show each field-specific message right under the relevant input,
+        // instead of a single generic toast that hides what actually failed.
+        backendErrors.forEach(({ field, message }) => {
+          if (field) {
+            setError(field, { type: "server", message });
+          }
+        });
+        toast.error(err.response?.data?.message || "Please fix the errors below");
+      } else {
+        toast.error(err.response?.data?.message || "Could not create account");
+      }
     } finally {
       setLoading(false);
     }
@@ -75,22 +102,35 @@ export default function Register() {
           label="I want to..."
           options={[
             { value: "buyer", label: "Buy pre-loved fashion" },
-            { value: "seller", label: "Sell my clothes" },
+            { value: "admin", label: "ReWear Nepal staff (admin)" },
           ]}
           error={errors.role?.message}
-          {...register("role", { required: "Please select a role" })}
-        />
-
-        <Input
-          label="Password"
-          type="password"
-          placeholder="At least 8 characters"
-          error={errors.password?.message}
-          {...register("password", {
-            required: "Password is required",
-            minLength: { value: 8, message: "Use at least 8 characters" },
+          {...register("role", {
+            required: "Please select a role",
+            validate: (value) =>
+              value !== "admin" ||
+              (email || "").toLowerCase().endsWith(ADMIN_EMAIL_DOMAIN) ||
+              `Admin accounts require a ${ADMIN_EMAIL_DOMAIN} email address`,
           })}
         />
+
+        <p className="-mt-2 text-xs text-ink-400">
+          Once you're signed up, you can list items for sale any time from your dashboard.
+        </p>
+
+        <div>
+          <Input
+            label="Password"
+            type="password"
+            placeholder="At least 8 characters"
+            error={errors.password?.message}
+            {...register("password", {
+              required: "Password is required",
+              validate: (value) => isStrongPassword(value) || STRONG_PASSWORD_MESSAGE,
+            })}
+          />
+          <PasswordStrengthMeter password={password} />
+        </div>
 
         <Input
           label="Confirm password"
@@ -102,6 +142,11 @@ export default function Register() {
             validate: (value) => value === password || "Passwords do not match",
           })}
         />
+
+        <div>
+          <Recaptcha onChange={setCaptchaToken} />
+          {captchaError && <p className="mt-1 text-xs text-red-500">{captchaError}</p>}
+        </div>
 
         <Button loading={loading}>Create account</Button>
       </form>

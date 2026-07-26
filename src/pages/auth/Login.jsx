@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import Input from "../../components/Input";
 import Button from "../../components/Button";
+import Recaptcha from "../../components/Recaptcha";
 import { useAuth } from "../../context/AuthContext";
 import { getDashboardPath } from "../../utils/roleRedirect";
 
@@ -14,14 +15,21 @@ export default function Login() {
     formState: { errors },
   } = useForm();
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState(null);
+  const [captchaError, setCaptchaError] = useState("");
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   const onSubmit = async (formData) => {
+    if (!captchaToken) {
+      setCaptchaError("Please complete the CAPTCHA");
+      return;
+    }
+    setCaptchaError("");
     setLoading(true);
     try {
-      const user = await login(formData);
+      const user = await login({ ...formData, captchaToken });
       // Respect a redirect the user was on their way to, otherwise send them
       // to their role's dashboard.
       const from = location.state?.from?.pathname;
@@ -57,6 +65,11 @@ export default function Login() {
           error={errors.password?.message}
           {...register("password", { required: "Password is required" })}
         />
+
+        <div>
+          <Recaptcha onChange={setCaptchaToken} />
+          {captchaError && <p className="mt-1 text-xs text-red-500">{captchaError}</p>}
+        </div>
 
         <Button loading={loading}>Log in</Button>
       </form>

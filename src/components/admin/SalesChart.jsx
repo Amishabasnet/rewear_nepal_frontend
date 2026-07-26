@@ -36,7 +36,7 @@ export default function SalesChart({ data = [] }) {
           y1={height - padding.bottom}
           x2={width - padding.right}
           y2={height - padding.bottom}
-          stroke="#D9D3CA"
+          stroke="#E8E2D3"
           strokeWidth="1"
         />
 
@@ -59,7 +59,7 @@ export default function SalesChart({ data = [] }) {
                 width={barWidth}
                 height={Math.max(barHeight, 2)}
                 rx={4}
-                fill={isHovered ? "#A84F22" : "#C4622D"}
+                fill={isHovered ? "#A85830" : "#C96F3E"}
                 className="transition-colors"
               />
               {isHovered && (
@@ -70,7 +70,7 @@ export default function SalesChart({ data = [] }) {
                     width={100}
                     height={26}
                     rx={6}
-                    fill="#1C1815"
+                    fill="#18181B"
                   />
                   <text
                     x={Math.min(Math.max(x - 20, padding.left), width - padding.right - 100) + 50}
@@ -78,7 +78,7 @@ export default function SalesChart({ data = [] }) {
                     textAnchor="middle"
                     fontSize="11"
                     fontWeight="600"
-                    fill="#FDFBF7"
+                    fill="#FBF7F0"
                   >
                     {formatNPR(d.value)}
                   </text>
@@ -89,7 +89,7 @@ export default function SalesChart({ data = [] }) {
                 y={height - padding.bottom + 16}
                 textAnchor="middle"
                 fontSize="10"
-                fill="#8A8177"
+                fill="#9A9AA4"
               >
                 {d.label}
               </text>

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ShoppingBag } from "lucide-react";
 import sellerService from "../../services/sellerService";
 import OrderStatusBadge from "../../components/OrderStatusBadge";
+import { formatOrderNumber } from "../../utils/formatOrderNumber";
 import { formatNPR } from "../../utils/formatCurrency";
 import { formatDate } from "../../utils/formatDate";
 import LoadingSpinner from "../../components/LoadingSpinner";
@@ -14,7 +15,7 @@ export default function SellerOrders() {
   useEffect(() => {
     sellerService
       .getOrders()
-      .then(({ data }) => setOrders(data.orders || data || []))
+      .then(({ data }) => setOrders(data.data || []))
       .catch(() => setOrders([]))
       .finally(() => setLoading(false));
   }, []);
@@ -40,13 +41,13 @@ export default function SellerOrders() {
             >
               <div>
                 <p className="font-medium text-ink-800">
-                  #{(order._id || order.id || "").toString().slice(-6).toUpperCase()}
+                  #{formatOrderNumber(order._id || order.id)}
                 </p>
                 <p className="text-xs text-ink-400">{formatDate(order.createdAt)}</p>
               </div>
-              <p className="text-ink-600">{order.buyerName || order.buyer?.name || "Buyer"}</p>
-              <span className="font-semibold">{formatNPR(order.total)}</span>
-              <OrderStatusBadge status={order.status} />
+              <p className="text-ink-600">{order.buyer?.name || "Buyer"}</p>
+              <span className="font-semibold">{formatNPR(order.mySubtotal)}</span>
+              <OrderStatusBadge status={order.orderStatus} />
             </div>
           ))}
         </div>

@@ -1,11 +1,15 @@
+import { getImageUrls } from "./getImageUrl";
+
 export function normalizeProduct(p = {}) {
   const seller = p.seller || p.sellerInfo || {};
+  const rawImages = p.images?.length ? p.images : p.image ? [p.image] : [];
+  const images = getImageUrls(rawImages);
 
   return {
     id: p._id || p.id,
     title: p.title || p.name || "Untitled product",
     price: Number(p.price ?? 0),
-    images: p.images?.length ? p.images : p.image ? [p.image] : [],
+    images,
     category: p.category || "",
     brand: p.brand || "",
     condition: p.condition || "",

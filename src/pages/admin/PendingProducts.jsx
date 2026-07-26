@@ -1,4 +1,4 @@
-import AdminProductsList from "../../components/admin/AdminProductsList";
+import AdminProductsList from "../../components/admin/AdminProductList";
 import adminService from "../../services/adminService";
 
 export default function AdminPendingProducts() {

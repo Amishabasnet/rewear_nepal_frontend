@@ -4,10 +4,8 @@ import toast from "react-hot-toast";
 import {
   Users,
   UserCheck,
-  Store,
   Package,
   PackageSearch,
-  ClipboardCheck,
   ShoppingBag,
   Wallet,
   Flag,
@@ -22,12 +20,8 @@ import OrderStatusBadge from "../../components/OrderStatusBadge";
 import SalesChart from "../../components/admin/SalesChart";
 import { formatNPR } from "../../utils/formatCurrency";
 import { formatDate } from "../../utils/formatDate";
-import {
-  normalizeStats,
-  normalizeSalesChart,
-  normalizeReportedProducts,
-  normalizeOrders,
-} from "../../utils/normalizeAdminData";
+import { normalizeStats, normalizeSalesChart, normalizeOrders } from "../../utils/normalizeAdminData";
+import { normalizeReportList, reasonLabel } from "../../utils/normalizeAdminReports";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -41,10 +35,11 @@ export default function AdminDashboard() {
     let active = true;
 
     const load = async () => {
-      const [dashboardRes, statsRes, ordersRes] = await Promise.allSettled([
+      const [dashboardRes, statsRes, ordersRes, reportsRes] = await Promise.allSettled([
         adminService.getDashboard(),
         adminService.getStats(),
         adminService.getRecentOrders({ limit: 8 }),
+        adminService.getReports({ status: "pending" }),
       ]);
 
       if (!active) return;
@@ -59,10 +54,11 @@ export default function AdminDashboard() {
       const dashboard = dashboardRes.status === "fulfilled" ? dashboardRes.value.data?.data ?? dashboardRes.value.data : {};
       const statsPayload = statsRes.status === "fulfilled" ? statsRes.value.data?.data ?? statsRes.value.data : {};
       const orders = ordersRes.status === "fulfilled" ? ordersRes.value.data?.data ?? ordersRes.value.data : [];
+      const reports = reportsRes.status === "fulfilled" ? reportsRes.value.data?.data ?? reportsRes.value.data : [];
 
-      setStats(normalizeStats(dashboard, statsPayload));
-      setSalesData(normalizeSalesChart(dashboard, statsPayload));
-      setReportedProducts(normalizeReportedProducts(dashboard, statsPayload));
+      setStats(normalizeStats(dashboard?.stats || dashboard, statsPayload));
+      setSalesData(normalizeSalesChart(dashboard?.stats || dashboard, statsPayload));
+      setReportedProducts(normalizeReportList(reports));
       setRecentOrders(normalizeOrders(orders?.orders || orders || dashboard?.recentOrders || []));
 
       setLoading(false);
@@ -97,21 +93,13 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Total Users" value={stats.totalUsers} icon={Users} accent="forest" to="/admin/users" />
         <StatCard label="Total Buyers" value={stats.totalBuyers} icon={UserCheck} accent="forest" to="/admin/users" />
-        <StatCard label="Total Sellers" value={stats.totalSellers} icon={Store} accent="forest" to="/admin/sellers" />
         <StatCard label="Total Products" value={stats.totalProducts} icon={Package} accent="mustard" to="/admin/products" />
         <StatCard
           label="Pending Product Approvals"
           value={stats.pendingProductApprovals}
           icon={PackageSearch}
           accent="rust"
-          to="/admin/products"
-        />
-        <StatCard
-          label="Pending Seller Approvals"
-          value={stats.pendingSellerApprovals}
-          icon={ClipboardCheck}
-          accent="rust"
-          to="/admin/sellers"
+          to="/admin/products/pending"
         />
         <StatCard label="Total Orders" value={stats.totalOrders} icon={ShoppingBag} accent="forest" to="/admin/orders" />
         <StatCard label="Total Revenue" value={formatNPR(stats.totalRevenue)} icon={Wallet} accent="mustard" />
@@ -149,12 +137,12 @@ export default function AdminDashboard() {
               {reportedProducts.slice(0, 5).map((item) => (
                 <li key={item.id} className="rounded-lg border border-ink-100 p-3">
                   <div className="flex items-start justify-between gap-2">
-                    <p className="truncate text-sm font-medium text-ink-800">{item.title}</p>
+                    <p className="truncate text-sm font-medium text-ink-800">{item.productName}</p>
                     <span className="shrink-0 rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-semibold text-red-600">
-                      {item.reportCount} report{item.reportCount === 1 ? "" : "s"}
+                      Pending
                     </span>
                   </div>
-                  <p className="mt-1 text-xs text-ink-400">Seller: {item.seller}</p>
+                  <p className="mt-1 text-xs text-ink-400">{reasonLabel(item.reason)}</p>
                 </li>
               ))}
             </ul>

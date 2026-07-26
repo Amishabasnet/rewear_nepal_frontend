@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Package } from "lucide-react";
 import orderService from "../../services/orderService";
+import { normalizeOrderList } from "../../utils/normalizeAdminOrders";
 import { formatNPR } from "../../utils/formatCurrency";
 import { formatDate } from "../../utils/formatDate";
 import LoadingSpinner from "../../components/LoadingSpinner";
@@ -9,7 +10,7 @@ import EmptyState from "../../components/EmptyState";
 
 const STATUS_STYLES = {
   pending: "bg-mustard-100 text-ink-800",
-  confirmed: "bg-forest-100 text-forest-700",
+  processing: "bg-forest-100 text-forest-700",
   shipped: "bg-blue-100 text-blue-700",
   delivered: "bg-forest-600 text-cream-50",
   cancelled: "bg-red-100 text-red-600",
@@ -22,7 +23,7 @@ export default function Orders() {
   useEffect(() => {
     orderService
       .getMyOrders()
-      .then(({ data }) => setOrders(data.orders || []))
+      .then(({ data }) => setOrders(normalizeOrderList(data)))
       .catch(() => setOrders([]))
       .finally(() => setLoading(false));
   }, []);
@@ -47,16 +48,16 @@ export default function Orders() {
         <div className="divide-y divide-ink-50 rounded-xl border border-ink-100 bg-white">
           {orders.map((order) => (
             <Link
-              key={order._id}
-              to={`/orders/${order._id}`}
+              key={order.id}
+              to={`/orders/${order.id}`}
               className="flex items-center justify-between gap-3 p-4 text-sm hover:bg-cream-50"
             >
               <div>
-                <p className="font-medium text-ink-800">#{order._id?.slice(-6).toUpperCase()}</p>
+                <p className="font-medium text-ink-800">#{order.orderNumber}</p>
                 <p className="text-xs text-ink-400">{formatDate(order.createdAt)}</p>
               </div>
               <span className="font-semibold">{formatNPR(order.total)}</span>
-              <span className={`rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${STATUS_STYLES[order.status] || "bg-ink-100 text-ink-600"}`}>
+              <span className={`rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${STATUS_STYLES[order.status?.toLowerCase()] || "bg-ink-100 text-ink-600"}`}>
                 {order.status}
               </span>
             </Link>

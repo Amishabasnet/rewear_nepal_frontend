@@ -3,7 +3,6 @@ import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Users,
-  Store,
   Package,
   ShoppingBag,
   Flag,
@@ -17,7 +16,6 @@ import { useAuth } from "../../context/AuthContext";
 
 const NAV_ITEMS = [
   { to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard, end: true },
-  { to: "/admin/sellers", label: "Seller Approvals", icon: Store },
   { to: "/admin/products", label: "Product Approvals", icon: Package },
   { to: "/admin/orders", label: "Orders", icon: ShoppingBag },
   { to: "/admin/users", label: "Users", icon: Users },

@@ -1,14 +1,20 @@
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import toast from "react-hot-toast";
 import authService from "../services/authService";
-import sellerService from "../services/sellerService";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
     const stored = localStorage.getItem("rewear_user");
-    return stored ? JSON.parse(stored) : null;
+    if (!stored) return null;
+    try {
+      return JSON.parse(stored);
+    } catch {
+      localStorage.removeItem("rewear_user");
+      localStorage.removeItem("rewear_token");
+      return null;
+    }
   });
   const [token, setToken] = useState(() => localStorage.getItem("rewear_token"));
   const [loading, setLoading] = useState(true);
@@ -23,7 +29,7 @@ export function AuthProvider({ children }) {
       }
       try {
         const { data } = await authService.getProfile();
-        const profile = data.user || data;
+        const profile = data.data;
         setUser(profile);
         localStorage.setItem("rewear_user", JSON.stringify(profile));
       } catch {
@@ -40,7 +46,7 @@ export function AuthProvider({ children }) {
 
   const persistSession = (data) => {
     const authToken = data.token || data.accessToken;
-    const authUser = data.user;
+    const authUser = data.data;
     localStorage.setItem("rewear_token", authToken);
     localStorage.setItem("rewear_user", JSON.stringify(authUser));
     setToken(authToken);
@@ -53,22 +59,6 @@ export function AuthProvider({ children }) {
     const authUser = persistSession(data);
     toast.success("Account created successfully!");
     return authUser;
-  }, []);
-
-  // Seller signup can either be auto-approved (backend returns a session
-  // straight away) or held for admin review (backend returns a status only).
-  const registerSeller = useCallback(async (formData) => {
-    const { data } = await sellerService.register(formData);
-    const authToken = data.token || data.accessToken;
-
-    if (authToken && data.user) {
-      const authUser = persistSession(data);
-      toast.success("Seller account created successfully!");
-      return { approved: true, user: authUser };
-    }
-
-    toast.success(data.message || "Seller application submitted for review.");
-    return { approved: false, status: data.status || "pending", message: data.message };
   }, []);
 
   const login = useCallback(async (credentials) => {
@@ -86,18 +76,25 @@ export function AuthProvider({ children }) {
     toast.success("Logged out successfully");
   }, []);
 
+  const updateUser = useCallback((partialUser) => {
+    setUser((prev) => {
+      const merged = { ...prev, ...partialUser };
+      localStorage.setItem("rewear_user", JSON.stringify(merged));
+      return merged;
+    });
+  }, []);
+
   const value = {
     user,
     token,
     loading,
     isAuthenticated: !!token && !!user,
     isBuyer: user?.role === "buyer",
-    isSeller: user?.role === "seller",
     isAdmin: user?.role === "admin",
     register,
-    registerSeller,
     login,
     logout,
+    updateUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

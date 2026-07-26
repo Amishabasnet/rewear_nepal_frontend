@@ -7,24 +7,28 @@ import Input from "../Input";
 import Textarea from "../Textarea";
 import Select from "../Select";
 import Button from "../Button";
-import MultiImageUpload from "./MultiImageUpload";
+import MultiImageUpload from "./MultipageUpload";
 import ProductStatusBadge from "./ProductStatusBadge";
 import sellerService from "../../services/sellerService";
-import uploadService from "../../services/uploadService";
+import uploadService from "../../services/uploadSeller";
 import { CATEGORIES, GENDERS, SIZES, BRANDS, CONDITIONS, LOCATIONS } from "../../utils/constants";
+import { getImageUrl } from "../../utils/getImageUrl";
 
 const toOptions = (list) => list.map((v) => ({ value: v, label: v }));
 
 // Turns an existing product's image URLs into MultiImageUpload items.
 const toImageItems = (images = []) =>
-  images.filter(Boolean).map((url, i) => ({
-    id: `existing-${i}-${url}`,
-    file: null,
-    preview: null,
-    remoteUrl: url,
-    uploading: false,
-    error: null,
-  }));
+  images
+    .map((img) => getImageUrl(img))
+    .filter(Boolean)
+    .map((url, i) => ({
+      id: `existing-${i}-${url}`,
+      file: null,
+      preview: null,
+      remoteUrl: url,
+      uploading: false,
+      error: null,
+    }));
 
 export default function ProductForm({ mode, productId, initialValues }) {
   const isEdit = mode === "edit";
@@ -129,7 +133,9 @@ export default function ProductForm({ mode, productId, initialValues }) {
               : "New listings are reviewed by an admin before they appear in the shop."}
           </p>
         </div>
-        {isEdit && initialValues?.status && <ProductStatusBadge status={initialValues.status} />}
+        {isEdit && initialValues?.approvalStatus && (
+          <ProductStatusBadge status={initialValues.approvalStatus} />
+        )}
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 rounded-xl border border-ink-100 bg-white p-5" noValidate>
