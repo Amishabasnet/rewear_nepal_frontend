@@ -20,6 +20,7 @@ import EmptyState from "../../components/EmptyState";
 import OrderStatusBadge from "../../components/OrderStatusBadge";
 import ProductStatusBadge from "../../components/seller/ProductStatusBadge";
 import { PRODUCT_STATUS_META } from "../../utils/constants";
+import { formatOrderNumber } from "../../utils/formatOrderNumber";
 import { formatNPR } from "../../utils/formatCurrency";
 import { formatDate } from "../../utils/formatDate";
 import { getImageUrl } from "../../utils/getImageUrl";
@@ -249,7 +250,7 @@ export default function SellerDashboard() {
                 <div key={order._id} className="flex items-center justify-between gap-3 py-3 text-sm">
                   <div>
                     <p className="font-medium text-ink-800">
-                      #{(order._id || "").toString().slice(-6).toUpperCase()}
+                      #{formatOrderNumber(order._id)}
                     </p>
                     <p className="text-xs text-ink-400">{formatDate(order.createdAt)}</p>
                   </div>

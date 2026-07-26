@@ -53,7 +53,7 @@ export default function Orders() {
               className="flex items-center justify-between gap-3 p-4 text-sm hover:bg-cream-50"
             >
               <div>
-                <p className="font-medium text-ink-800">#{order.id?.slice(-6).toUpperCase()}</p>
+                <p className="font-medium text-ink-800">#{order.orderNumber}</p>
                 <p className="text-xs text-ink-400">{formatDate(order.createdAt)}</p>
               </div>
               <span className="font-semibold">{formatNPR(order.total)}</span>

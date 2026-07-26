@@ -58,6 +58,7 @@ export default function AdminOrdersList() {
       const matchesStatus = status ? o.status === status : true;
       const matchesSearch = term
         ? o.id.toLowerCase().includes(term) ||
+          o.orderNumber.toLowerCase().includes(term) ||
           o.buyerName.toLowerCase().includes(term) ||
           o.buyerEmail.toLowerCase().includes(term)
         : true;
@@ -131,7 +132,7 @@ export default function AdminOrdersList() {
               {paged.map((o) => (
                 <tr key={o.id} className="hover:bg-cream-50">
                   <td className="px-4 py-3 font-medium text-ink-800">
-                    #{o.id.slice(-6).toUpperCase()}
+                    #{o.orderNumber}
                   </td>
                   <td className="px-4 py-3 text-ink-600">
                     <div>{o.buyerName}</div>

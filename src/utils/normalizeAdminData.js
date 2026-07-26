@@ -1,3 +1,5 @@
+import { formatOrderNumber } from "./formatOrderNumber";
+
 function pick(source, keys, fallback = 0) {
   if (!source) return fallback;
   for (const key of keys) {
@@ -50,7 +52,7 @@ export function normalizeOrders(recentOrders = []) {
 
   return raw.map((order) => ({
     id: order._id || order.id,
-    orderNumber: order.orderNumber || order._id?.slice(-6) || order.id?.slice?.(-6) || "N/A",
+    orderNumber: order.orderNumber || formatOrderNumber(order._id || order.id),
     buyer: order.buyerName || order.buyer?.name || order.user?.name || "Unknown buyer",
     amount: Number(order.totalAmount ?? order.total ?? order.amount ?? 0),
     status: order.status || "pending",

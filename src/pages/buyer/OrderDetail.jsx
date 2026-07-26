@@ -35,7 +35,7 @@ export default function OrderDetail() {
       ) : (
         <div className="rounded-xl border border-ink-100 bg-white p-6">
           <h1 className="text-xl font-semibold text-ink-900">
-            Order #{order.id?.slice(-6).toUpperCase()}
+            Order #{order.orderNumber}
           </h1>
           <p className="text-sm text-ink-400">Placed on {formatDate(order.createdAt)}</p>
           <p className="mt-4 text-2xl font-bold text-rust-500">{formatNPR(order.total)}</p>

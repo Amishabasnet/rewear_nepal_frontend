@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { CheckCircle2, Package, ShoppingBag } from "lucide-react";
 import orderService from "../../services/orderService";
 import { normalizeOrder } from "../../utils/normalizeAdminOrders";
+import { formatOrderNumber } from "../../utils/formatOrderNumber";
 import { formatNPR } from "../../utils/formatCurrency";
 import { formatDate } from "../../utils/formatDate";
 import LoadingSpinner from "../../components/LoadingSpinner";
@@ -45,7 +46,7 @@ export default function OrderSuccess() {
           <div className="flex items-center justify-between border-b border-dashed border-ink-200 pb-3">
             <span className="text-ink-500">Order number</span>
             <span className="font-semibold text-ink-900">
-              #{(order.id || id).toString().slice(-6).toUpperCase()}
+              #{order.orderNumber || formatOrderNumber(id)}
             </span>
           </div>
           <div className="flex items-center justify-between py-2">
