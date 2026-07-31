@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import {
@@ -20,7 +20,6 @@ import {
 import productService from "../../services/productService";
 import wishlistService from "../../services/wishlistService";
 import reviewService from "../../services/reviewService";
-import { sampleProducts } from "../../data/sampleProducts";
 import { formatNPR } from "../../utils/formatCurrency";
 import { addRecentlyViewed } from "../../utils/recentlyViewed";
 import { CONDITION_LABEL } from "../../utils/constants";
@@ -82,7 +81,7 @@ export default function ProductDetail() {
   const [avgRating, setAvgRating] = useState(0);
   const [deletingReviewId, setDeletingReviewId] = useState(null);
 
-  // Load the product — try the live API first, fall back to sample data
+  // Load the product from the live API.
   useEffect(() => {
     let active = true;
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -101,13 +100,7 @@ export default function ProductDetail() {
       })
       .catch(() => {
         if (!active) return;
-        const fallback = normalizeProduct(sampleProducts.find((p) => p._id === id));
-        if (fallback) {
-          setProduct(fallback);
-          addRecentlyViewed(fallback);
-        } else {
-          setNotFound(true);
-        }
+        setNotFound(true);
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -172,12 +165,32 @@ export default function ProductDetail() {
   const lowStock = stockKnown && product.stock > 0 && product.stock <= 3;
   const maxQty = stockKnown ? Math.max(1, Math.min(product.stock, 10)) : 10;
 
-  const similarProducts = useMemo(() => {
-    if (!product) return [];
-    return sampleProducts
-      .filter((p) => p._id !== product._id && (p.brand === product.brand || !product.brand))
-      .slice(0, 4);
-  }, [product]);
+  const [similarProducts, setSimilarProducts] = useState([]);
+
+  useEffect(() => {
+    if (!product?.category) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSimilarProducts([]);
+      return;
+    }
+    let active = true;
+    productService
+      .getAll({ category: product.category, limit: 5 })
+      .then(({ data }) => {
+        if (!active) return;
+        const list = (data.products || [])
+          .map((p) => ({ ...p, title: p.title || p.name }))
+          .filter((p) => p._id !== product._id)
+          .slice(0, 4);
+        setSimilarProducts(list);
+      })
+      .catch(() => {
+        if (active) setSimilarProducts([]);
+      });
+    return () => {
+      active = false;
+    };
+  }, [product?.category, product?._id]);
 
   const requireAuth = (message) => {
     if (isAuthenticated) return true;

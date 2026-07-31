@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { SearchX } from "lucide-react";
 import productService from "../../services/productService";
-import { sampleProducts } from "../../data/sampleProducts";
 import ProductCard from "../../components/ProductCard";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import EmptyState from "../../components/EmptyState";
@@ -16,41 +15,30 @@ function normalizeProduct(p = {}) {
   };
 }
 
-function filterSampleProducts(products, keyword) {
-  if (!keyword) return products;
-  const term = keyword.trim().toLowerCase();
-  if (!term) return products;
-  return products.filter(
-    (p) =>
-      p.title?.toLowerCase().includes(term) ||
-      p.brand?.toLowerCase().includes(term)
-  );
-}
-
 export default function ProductList() {
   const { params, setParams } = useQueryParams();
   const keyword = params.q || "";
 
-  const [products, setProducts] = useState(sampleProducts);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     let active = true;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
+    setLoadError(false);
 
     productService
       .getAll(keyword ? { keyword } : undefined)
       .then(({ data }) => {
         if (!active) return;
-        const fetched = data.products?.length
-          ? data.products.map(normalizeProduct)
-          : filterSampleProducts(sampleProducts, keyword);
-        setProducts(fetched);
+        setProducts((data.products || []).map(normalizeProduct));
       })
       .catch(() => {
         if (!active) return;
-        setProducts(filterSampleProducts(sampleProducts, keyword));
+        setProducts([]);
+        setLoadError(true);
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -74,11 +62,19 @@ export default function ProductList() {
       ) : products.length === 0 ? (
         <EmptyState
           icon={SearchX}
-          title={keyword ? `No results for "${keyword}"` : "No products found"}
+          title={
+            loadError
+              ? "Couldn't load listings"
+              : keyword
+                ? `No results for "${keyword}"`
+                : "No products found"
+          }
           message={
-            keyword
-              ? "Try a different keyword or browse all listings."
-              : "Check back soon for new listings."
+            loadError
+              ? "Something went wrong reaching the server. Please try again."
+              : keyword
+                ? "Try a different keyword or browse all listings."
+                : "Check back soon for new listings."
           }
           action={
             keyword ? (

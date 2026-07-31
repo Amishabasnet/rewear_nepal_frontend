@@ -11,7 +11,12 @@ export function getSocket() {
 
   try {
     socket = io(SOCKET_URL, {
-      auth: { token: localStorage.getItem("rewear_token") },
+      // No token here on purpose — the access token lives only in an
+      // httpOnly cookie now, which JS can't read anyway. `withCredentials`
+      // makes the browser attach that cookie to the socket.io handshake;
+      // the server authenticates the connection from it, the same way it
+      // authenticates regular HTTP requests.
+      withCredentials: true,
       autoConnect: true,
       reconnectionAttempts: 3,
       transports: ["websocket", "polling"],
