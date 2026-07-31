@@ -17,7 +17,7 @@ export default function Wishlist() {
   useEffect(() => {
     wishlistService
       .getWishlist()
-      .then(({ data }) => setItems(data.items || data.data?.items || []))
+      .then(({ data }) => setItems(data.data?.products || []))
       .catch(() => setItems([]))
       .finally(() => setLoading(false));
   }, []);

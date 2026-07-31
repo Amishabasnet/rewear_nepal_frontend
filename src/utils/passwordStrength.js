@@ -38,10 +38,11 @@ export function isStrongPassword(value) {
 
 const LABELS = ["Very weak", "Weak", "Fair", "Strong", "Very strong"];
 const BAR_COLORS = ["bg-red-500", "bg-orange-500", "bg-amber-500", "bg-lime-500", "bg-emerald-500"];
+const TEXT_COLORS = ["text-red-500", "text-orange-500", "text-amber-600", "text-lime-600", "text-emerald-600"];
 
 export function calculatePasswordStrength(password) {
   if (typeof password !== "string" || password.length === 0) {
-    return { score: 0, label: "", feedback: [], barColor: BAR_COLORS[0] };
+    return { score: 0, label: "", feedback: [], barColor: BAR_COLORS[0], textColor: TEXT_COLORS[0] };
   }
 
   const feedback = [];
@@ -80,5 +81,6 @@ export function calculatePasswordStrength(password) {
     label: LABELS[score],
     feedback,
     barColor: BAR_COLORS[score],
+    textColor: TEXT_COLORS[score],
   };
 }

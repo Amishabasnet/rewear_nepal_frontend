@@ -4,6 +4,34 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
+      Content-Security-Policy: this is what actually protects the SPA itself
+      from XSS (the backend's own CSP header only covers responses the
+      Express API serves directly, not this HTML document, since Vite/your
+      static host serves this file). Update the localhost origins below to
+      your real API domain when you deploy.
+
+      - script-src has NO 'unsafe-inline' — an injected <script> tag or
+        inline event handler (e.g. onerror="...") simply won't execute.
+      - object-src 'none' blocks Flash/legacy plugin-based vectors.
+      - frame-ancestors would need to be an HTTP header (meta tags can't
+        set it) — set it in your hosting/reverse-proxy config too.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="
+        default-src 'self';
+        script-src 'self' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/;
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+        font-src 'self' https://fonts.gstatic.com;
+        img-src 'self' data: blob: http://localhost:5000 https://res.cloudinary.com;
+        connect-src 'self' http://localhost:5000 ws://localhost:5000;
+        frame-src https://www.google.com/recaptcha/;
+        object-src 'none';
+        base-uri 'self';
+        form-action 'self';
+      "
+    />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

@@ -3,7 +3,7 @@ import { calculatePasswordStrength } from "../utils/passwordStrength";
 export default function PasswordStrengthMeter({ password }) {
   if (!password) return null;
 
-  const { score, label, feedback, barColor } = calculatePasswordStrength(password);
+  const { score, label, feedback, barColor, textColor } = calculatePasswordStrength(password);
 
   return (
     <div className="mt-2">
@@ -20,7 +20,11 @@ export default function PasswordStrengthMeter({ password }) {
 
       <div className="mt-1.5 flex items-center justify-between">
         <p className="text-xs font-medium text-ink-500">
-          {label && <>Strength: <span className="text-ink-700">{label}</span></>}
+          {label && (
+            <>
+              Strength: <span className={`font-semibold ${textColor}`}>{label}</span>
+            </>
+          )}
         </p>
       </div>
 

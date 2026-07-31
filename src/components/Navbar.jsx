@@ -4,6 +4,7 @@ import { LogOut, Menu, ShoppingBag } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import NavSidePanel from "./NavSidePanel";
+import NotificationBell from "./NotificationBell";
 
 export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -60,6 +61,7 @@ export default function Navbar() {
 
           {isAuthenticated ? (
             <>
+              <NotificationBell />
               <div className="hidden text-right sm:block">
                 <p className="text-sm font-semibold text-ink-900">{user?.name}</p>
                 <p className="text-xs capitalize text-ink-400">{user?.role}</p>

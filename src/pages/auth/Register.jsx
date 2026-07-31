@@ -73,6 +73,15 @@ export default function Register() {
           {...register("name", {
             required: "Name is required",
             minLength: { value: 2, message: "Name is too short" },
+            pattern: {
+              value: /^[A-Za-z\s]+$/,
+              message: "Name can only contain letters and spaces",
+            },
+            // Strip any digit/symbol as the user types, so bad characters
+            // never make it into the field in the first place.
+            onChange: (e) => {
+              e.target.value = e.target.value.replace(/[^A-Za-z\s]/g, "");
+            },
           })}
         />
 
@@ -83,18 +92,31 @@ export default function Register() {
           error={errors.email?.message}
           {...register("email", {
             required: "Email is required",
-            pattern: { value: /^\S+@\S+\.\S+$/, message: "Enter a valid email address" },
+            pattern: {
+              value: /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/,
+              message: "Enter a valid email address (e.g. name@example.com)",
+            },
           })}
         />
 
         <Input
           label="Phone number"
           type="tel"
+          inputMode="numeric"
+          maxLength={10}
           placeholder="98XXXXXXXX"
           error={errors.phone?.message}
           {...register("phone", {
             required: "Phone number is required",
-            pattern: { value: /^[0-9+\s-]{7,15}$/, message: "Enter a valid phone number" },
+            pattern: {
+              value: /^[0-9]{10}$/,
+              message: "Phone number must be exactly 10 digits",
+            },
+            // Strip anything that isn't a digit and cap at 10 characters
+            // as the user types, instead of only catching it on submit.
+            onChange: (e) => {
+              e.target.value = e.target.value.replace(/[^0-9]/g, "").slice(0, 10);
+            },
           })}
         />
 
